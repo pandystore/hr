@@ -308,3 +308,5 @@ tr.settled[data-act="slip"] td{background:transparent} tr.settled[data-act="slip
 @media(prefers-reduced-motion:reduce){.lg .lg-card,.lg-btn:disabled::after{animation:none}}
 .lg-input input,.lg-input input:focus{border:0;box-shadow:none;background:transparent;border-radius:0;min-height:0;outline:0}
 .lg-input input:-webkit-autofill{-webkit-box-shadow:0 0 0 40px var(--surface) inset;-webkit-text-fill-color:var(--fg)}
+
+.sheetbg{z-index:10050}.toast{z-index:10060}
