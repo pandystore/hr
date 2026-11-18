@@ -34,7 +34,7 @@ async function sha(s) {
   return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
 }
 /* اسم المستخدم يتحول لبريد وهمي ثابت (يدعم الحروف العربية)، وكلمة المرور الرقمية تُزاد لتبلغ حد Firebase الأدنى (6). */
-async function emailOf(u) { return 'u' + (await sha(String(u).normalize('NFC').toLowerCase())).slice(0, 40) + '@hr-system.app'; }
+async function emailOf(u) { return 'u' + (await sha(String(u).normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase())).slice(0, 40) + '@hr-system.app'; }
 const pwOf = p => 'HR#' + p + '#sys';
 
 function flatten(DB) {
@@ -158,9 +158,20 @@ function notifyRemote() {
 /* يبدأ الاستماع ويُرجع البيانات الأولية بعد وصول أول لقطة من كل المجموعات */
 function start(handlers) {
   Object.assign(H, handlers);
-  const names = ['meta'].concat(COLS);
+  const names = COLS;
   return new Promise((resolve, reject) => {
-    let left = names.length, failed = false;
+    let left = names.length + 1, failed = false;
+    /* الإعدادات: مستند واحد meta/main (لا نقرأ مجموعة meta كلها لأن فيها مستند التهيئة المحجوب) */
+    let metaFirst = true;
+    unsubs.push(onSnapshot(doc(db, 'meta', 'main'), snap => {
+      let changed = false;
+      if (!snap.exists()) { changed = shadow.delete('meta/main'); }
+      else if (metaFirst || !snap.metadata.hasPendingWrites) {
+        const j = snap.data().j; if (shadow.get('meta/main') !== j) { shadow.set('meta/main', j); changed = true; }
+      }
+      if (metaFirst) { metaFirst = false; if (--left === 0) { ready = true; resolve(assemble()); } }
+      else if (changed && ready) notifyRemote();
+    }, err => { if (!failed) { failed = true; reject(err); } fail(err); }));
     names.forEach(col => {
       let first = true;
       unsubs.push(onSnapshot(collection(db, col), snap => {
