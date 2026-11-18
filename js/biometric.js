@@ -35,8 +35,8 @@ function bioModal(username){
  bioSupported().then(function(ok){
   if(!ok)return toast('هذا الجهاز أو المتصفح لا يدعم الدخول بالبصمة. فعّل بصمة أو قفل شاشة للجهاز.');
   bioEnabledFor().then(function(cur){var on=cur&&cur.username===username;
-   openModal({title:'الدخول ببصمة الجهاز',body:'<p class="hint">'+(on?'الدخول بالبصمة مفعّل على هذا الجهاز لحساب <b>'+esc(username)+'</b>.':'بعد التفعيل تدخل بالبصمة أو الوجه بدل كتابة كلمة المرور على هذا الجهاز فقط. أدخل كلمة مرورك الحالية للتأكيد.')+'</p>'+(on?'':'<div class="fgrid">'+field('bio_pass','كلمة المرور الحالية','password','',{attrs:'inputmode="numeric" autocomplete="current-password"'})+'</div>'),
+   openModal({title:'الدخول ببصمة الجهاز',body:'<p class="hint">'+(on?'الدخول بالبصمة مفعّل على هذا الجهاز لحساب <b>'+esc(username)+'</b>.':'بعد التفعيل تدخل بالبصمة أو الوجه بدل كتابة كلمة المرور على هذا الجهاز فقط. أدخل كلمة مرورك الحالية للتأكيد.')+'</p>'+(on?'':'<div class="fgrid">'+field('bio_pass','كلمة المرور الحالية','password','',{attrs:'autocomplete="current-password"'})+'</div>'),
     onOpen:function(){var i=$('#bio_pass');if(i)i.addEventListener('input',function(){normalizeLoginInput(this,true);});},
     actions:on?[{label:'إلغاء التفعيل',cls:'bad',fn:function(){bioDisable().then(function(){closeModal();toast('تم إلغاء الدخول بالبصمة');});}},{label:'إغلاق',fn:closeModal}]
-     :[{label:'تفعيل',cls:'pri',fn:function(){var p=toEn(val('bio_pass'));if(!validPass(p))return merr('أدخل كلمة المرور (أرقام).');
+     :[{label:'تفعيل',cls:'pri',fn:function(){var p=toEn(val('bio_pass'));if(!validPass(p))return merr('أدخل كلمة المرور.');
       HRStore.verifyPassword(p).then(function(){return bioEnable(username,p);}).then(function(){closeModal();toast('تم تفعيل الدخول بالبصمة ✓');},function(e){merr(e&&e.code&&String(e.code).indexOf('auth/')===0?'كلمة المرور غير صحيحة.':bioErr(e));});}},{label:'إلغاء',fn:closeModal}]});});});}

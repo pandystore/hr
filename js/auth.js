@@ -12,27 +12,50 @@ var LOGIN_ERR={
 function errMsg(e){return LOGIN_ERR[e&&e.code]||('تعذر تنفيذ العملية'+(e&&e.code?' ('+e.code+')':'')+'.');}
 function normUser(u){return toEn(u).replace(/\s+/g,' ').trim();}
 function validUser(u){return /^[\p{L}\p{N}]+( [\p{L}\p{N}]+)*$/u.test(u);}
-function validPass(p){return /^\d{4,20}$/.test(p);}
-function normalizeLoginInput(el,digitsOnly){var v=toEn(el.value);v=digitsOnly?v.replace(/\D/g,''):v.replace(/\s{2,}/g,' ').replace(/^\s+/,'');if(v!==el.value)el.value=v;}
-/* شاشة الدخول: اسم مستخدم (حروف/أرقام) وكلمة مرور أرقام فقط، وتقبل الأرقام العربية */
+function validPass(p){return /^[\p{L}\p{N}]{4,32}$/u.test(p);}
+function normalizeLoginInput(el,isPass){var v=toEn(el.value);v=isPass?v.replace(/\s/g,''):v.replace(/\s{2,}/g,' ').replace(/^\s+/,'');if(v!==el.value)el.value=v;}
+/* شاشة الدخول: اسم مستخدم، وكلمة مرور حروف وأرقام (4 خانات على الأقل). الأرقام العربية تتحول تلقائياً. أول مدير: اسم من كلمتين */
+var IC={user:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>',
+ lock:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+ eye:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+ eyeoff:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.3 6.3C3.7 8 2 12 2 12s3.6 7 10 7c1.7 0 3.2-.4 4.5-1M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
+ finger:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 11v3.5c0 2.2-.6 4.2-1.8 6M8 12a4 4 0 0 1 8 0v2.5c0 1.8-.3 3.5-1 5M5 14c0-.7 0-1 .1-2a7 7 0 0 1 13.8 0c.1 1 .1 1.3.1 2.5 0 1.5-.2 2.9-.6 4.2M3 9.5a10 10 0 0 1 18 0"/></svg>',
+ logo:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.8.2 4.5 2.2 4.5 5.3"/></svg>',
+ check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'};
+function validAdminName(u){return /^[\p{L}\p{N}]+ [\p{L}\p{N}]+$/u.test(u);}
 function showLogin(msg){
  closeModal();var old=$('.login-screen');if(old)old.remove();var first=false;
- var overlay=document.createElement('div');overlay.className='login-screen';
- overlay.innerHTML='<div class="card login-box"><h2 id="logintitle"></h2><p class="hint" id="loginhint"></p><div class="field"><label for="loginuser">اسم المستخدم</label><input id="loginuser" autocomplete="username" autocapitalize="off"></div><div class="field" style="margin-top:10px"><label for="loginpass">كلمة المرور</label><input id="loginpass" type="password" inputmode="numeric" autocomplete="current-password"></div><p class="err" id="loginerror" role="alert"></p><button class="btn pri" id="loginbutton"></button> <button class="btn sm" id="loginmode" type="button" style="margin-top:10px"></button><button class="btn big" id="loginbio" type="button" hidden style="width:100%;margin-top:14px">👆 الدخول بالبصمة / الوجه</button></div>';
+ var overlay=document.createElement('div');overlay.className='login-screen lg';
+ overlay.innerHTML='<div class="lg-card">'+
+  '<div class="lg-side"><div class="lg-logo">'+IC.logo+'</div><h2>نظام شؤون الموظفين</h2><p>كل ما تحتاجه لإدارة فريقك في مكان واحد.</p>'+
+  '<ul><li>'+IC.check+'حضور وانصراف بالموقع الجغرافي</li><li>'+IC.check+'رواتب وسلف وحوافز تُحسب تلقائياً</li><li>'+IC.check+'بياناتك آمنة ومتزامنة على السحابة</li></ul></div>'+
+  '<div class="lg-main"><div class="lg-mob-brand"><div class="lg-logo">'+IC.logo+'</div><b>نظام شؤون الموظفين</b></div>'+
+  '<h1 id="logintitle"></h1><p class="lg-sub" id="loginhint"></p>'+
+  '<label class="lg-field"><span>اسم المستخدم</span><div class="lg-input">'+IC.user+'<input id="loginuser" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="اسم المستخدم"></div></label>'+
+  '<label class="lg-field"><span>كلمة المرور</span><div class="lg-input">'+IC.lock+'<input id="loginpass" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="كلمة المرور"><button type="button" class="lg-eye" id="lgeye" aria-label="إظهار كلمة المرور">'+IC.eye+'</button></div></label>'+
+  '<div class="lg-err" id="loginerror" role="alert"></div>'+
+  '<button class="lg-btn" id="loginbutton" type="button"></button>'+
+  '<button class="lg-bio" id="loginbio" type="button" hidden>'+IC.finger+'<span></span></button>'+
+  '<button class="lg-link" id="loginmode" type="button"></button></div></div>';
  document.body.appendChild(overlay);
- function mode(f){first=f;$('#logintitle').textContent=f?'إنشاء حساب المدير (أول تشغيل)':'تسجيل الدخول';$('#loginhint').textContent=f?'يعمل هذا الخيار مرة واحدة فقط عند تهيئة النظام لأول مرة. احتفظ ببياناته في مكان آمن.':'';$('#loginbutton').textContent=f?'إنشاء ودخول':'دخول';$('#loginmode').textContent=f?'لدي حساب بالفعل':'أول تشغيل؟ إنشاء حساب المدير';$('#loginerror').textContent='';}
+ function mode(f){first=f;$('#logintitle').textContent=f?'إنشاء حساب المدير':'مرحباً بعودتك';
+  $('#loginhint').textContent=f?'أول تشغيل: اسم المستخدم من كلمتين، وكلمة المرور حروف وأرقام (4 خانات على الأقل).':'سجّل الدخول للمتابعة.';
+  $('#loginbutton').textContent=f?'إنشاء الحساب والدخول':'تسجيل الدخول';$('#loginmode').textContent=f?'لدي حساب بالفعل':'أول تشغيل؟ إنشاء حساب المدير';
+  $('#loginpass').autocomplete=f?'new-password':'current-password';$('#loginerror').textContent='';}
  mode(false);if(msg)$('#loginerror').textContent=msg;
  $('#loginuser').addEventListener('input',function(){normalizeLoginInput(this,false);});
  $('#loginpass').addEventListener('input',function(){normalizeLoginInput(this,true);});
+ $('#lgeye').onclick=function(){var i=$('#loginpass'),show=i.type==='password';i.type=show?'text':'password';this.innerHTML=show?IC.eyeoff:IC.eye;this.setAttribute('aria-label',show?'إخفاء كلمة المرور':'إظهار كلمة المرور');};
  $('#loginmode').onclick=function(){mode(!first);};
- function submit(){var u=normUser($('#loginuser').value),p=toEn($('#loginpass').value).trim(),err=$('#loginerror'),btn=$('#loginbutton');
-  if(!validUser(u)){err.textContent='اسم المستخدم حروف وأرقام فقط (يسمح بمسافة بين الكلمات).';return;}
-  if(!validPass(p)){err.textContent='كلمة المرور أرقام فقط، من 4 إلى 20 رقماً.';return;}
+ function submit(){var u=normUser($('#loginuser').value),p=toEn($('#loginpass').value).replace(/\s/g,''),err=$('#loginerror'),btn=$('#loginbutton');
+  if(first){if(!validAdminName(u)){err.textContent='اسم المستخدم للمدير يتكون من كلمتين (مثل: أحمد علي).';return;}}
+  else if(!validUser(u)){err.textContent='اسم المستخدم حروف وأرقام فقط (يسمح بمسافة بين الكلمات).';return;}
+  if(!validPass(p)){err.textContent='كلمة المرور حروف وأرقام فقط، 4 خانات على الأقل.';return;}
   err.textContent='';btn.disabled=true;
   (first?HRStore.bootstrapAdmin(u,p).then(function(){return window.hrAfterAuth();}):HRStore.login(u,p)).catch(function(e){err.textContent=errMsg(e);btn.disabled=false;});}
  $('#loginbutton').onclick=submit;
  overlay.addEventListener('keydown',function(e){if(e.key==='Enter')submit();});
- bioSupported().then(function(ok){if(!ok)return;bioEnabledFor().then(function(cur){if(!cur)return;var b=$('#loginbio');if(!b)return;b.hidden=false;b.textContent='👆 الدخول بالبصمة: '+cur.username;
+ bioSupported().then(function(ok){if(!ok)return;bioEnabledFor().then(function(cur){if(!cur)return;var b=$('#loginbio');if(!b)return;b.hidden=false;$('span',b).textContent='الدخول بالبصمة: '+cur.username;
   b.onclick=function(){var err=$('#loginerror');err.textContent='';b.disabled=true;
    bioUnlock().then(function(c){return HRStore.login(c.u,c.p).catch(function(e){if(e&&/^auth\//.test(e.code||'')&&e.code!=='auth/network-request-failed'&&e.code!=='auth/too-many-requests'){bioDisable();b.hidden=true;err.textContent='تغيّرت بيانات الدخول. سجّل بكلمة المرور ثم فعّل البصمة من جديد.';}throw e;});})
    .catch(function(e){if(!err.textContent)err.textContent=e&&e.code?errMsg(e):bioErr(e);b.disabled=false;});};});});
@@ -41,11 +64,11 @@ function showLoading(t){var old=$('.login-screen');if(old)old.remove();var o=doc
 function hideLoading(){var o=$('.login-screen');if(o)o.remove();}
 function fatalScreen(title,html){var old=$('.login-screen');if(old)old.remove();var o=document.createElement('div');o.className='login-screen';o.innerHTML='<div class="card login-box"><h2>'+esc(title)+'</h2><div class="hint" style="line-height:1.9">'+html+'</div></div>';document.body.appendChild(o);}
 function changePassModal(){
- openModal({title:'تغيير كلمة المرور',body:'<div class="fgrid">'+field('cp_old','كلمة المرور الحالية','password','',{attrs:'inputmode="numeric" autocomplete="current-password"'})+field('cp_new','كلمة المرور الجديدة (أرقام، 4 على الأقل)','password','',{attrs:'inputmode="numeric" autocomplete="new-password"'})+field('cp_new2','تأكيد كلمة المرور الجديدة','password','',{attrs:'inputmode="numeric" autocomplete="new-password"'})+'</div>',
+ openModal({title:'تغيير كلمة المرور',body:'<div class="fgrid">'+field('cp_old','كلمة المرور الحالية','password','',{attrs:'autocomplete="current-password"'})+field('cp_new','كلمة المرور الجديدة (حروف وأرقام، 4 على الأقل)','password','',{attrs:'autocomplete="new-password"'})+field('cp_new2','تأكيد كلمة المرور الجديدة','password','',{attrs:'autocomplete="new-password"'})+'</div>',
   onOpen:function(){['cp_old','cp_new','cp_new2'].forEach(function(id){$('#'+id).addEventListener('input',function(){normalizeLoginInput(this,true);});});},
-  actions:[{label:'حفظ',cls:'pri',fn:function(){var o=toEn(val('cp_old')),n=toEn(val('cp_new')),n2=toEn(val('cp_new2'));if(!validPass(o))return merr('أدخل كلمة المرور الحالية (أرقام).');if(!validPass(n))return merr('كلمة المرور الجديدة أرقام فقط، من 4 إلى 20 رقماً.');if(n!==n2)return merr('تأكيد كلمة المرور غير مطابق.');
+  actions:[{label:'حفظ',cls:'pri',fn:function(){var o=toEn(val('cp_old')),n=toEn(val('cp_new')),n2=toEn(val('cp_new2'));if(!validPass(o))return merr('أدخل كلمة المرور الحالية.');if(!validPass(n))return merr('كلمة المرور الجديدة حروف وأرقام، 4 خانات على الأقل.');if(n!==n2)return merr('تأكيد كلمة المرور غير مطابق.');
    HRStore.changeOwnPassword(o,n).then(function(){bioDisable();closeModal();toast('تم تغيير كلمة المرور. فعّل الدخول بالبصمة من جديد إن أردت.');},function(e){merr(errMsg(e));});}},{label:'إلغاء',fn:closeModal}]});}
-function settingsExtras(){return '<div class="grid two-eq" style="margin-bottom:14px"><div class="card"><h2>الوظائف المكودة</h2><p class="sub">أضف الوظائف لتظهر عند تسجيل الموظفين. الوظائف المستخدمة لا يمكن حذفها.</p><div class="toolbar"><input id="newjob" class="grow" placeholder="اسم الوظيفة"><button class="btn pri" data-act="jobadd">إضافة وظيفة</button></div>'+((DB.settings.jobs||[]).map(function(j,i){return '<div class="alert"><b style="flex:1">'+esc(j)+'</b><button class="btn sm bad" data-act="jobdel" data-i="'+i+'">حذف</button></div>';}).join('')||'<div class="hint">لا توجد وظائف بعد</div>')+departmentSettings()+'</div><div class="card"><h2>المستخدمون والصلاحيات</h2><p class="sub">الدخول إلى البيانات محصور بالحسابات المسجلة (قواعد Firestore). صلاحيات الشاشات والإجراءات تُطبَّق في الواجهة. كلمة المرور رقمية (4 أرقام على الأقل) وتقبل الأرقام العربية.</p><div class="fgrid"><input id="newuser" placeholder="اسم المستخدم: حروف أو أرقام"><input id="newpass" placeholder="كلمة المرور" type="password" inputmode="numeric" autocomplete="new-password"></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0">'+PERMS.map(function(p){return '<label><input type="checkbox" value="'+p[0]+'" class="permcheck"> '+p[1]+'</label>';}).join('')+'</div><button class="btn pri" data-act="useradd">إضافة مستخدم</button>'+USERS.map(function(u,i){if(u.empId)return '';return '<div class="alert"><span style="flex:1">'+esc(u.username)+(u.admin?' · مدير':u.empId?' · بصمة موظف '+esc(u.empId):' · مستخدم')+'</span>'+(u.admin?'':(u.empId?'':'<button class="btn sm" data-act="useredit" data-i="'+i+'">تعديل الصلاحيات</button> ')+'<button class="btn sm bad" data-act="userdel" data-i="'+i+'">حذف</button>')+'</div>';}).join('')+'</div></div>'+geoCard()+empAccountsCard();}
+function settingsExtras(){return '<div class="grid two-eq" style="margin-bottom:14px"><div class="card"><h2>الوظائف المكودة</h2><p class="sub">أضف الوظائف لتظهر عند تسجيل الموظفين. الوظائف المستخدمة لا يمكن حذفها.</p><div class="toolbar"><input id="newjob" class="grow" placeholder="اسم الوظيفة"><button class="btn pri" data-act="jobadd">إضافة وظيفة</button></div>'+((DB.settings.jobs||[]).map(function(j,i){return '<div class="alert"><b style="flex:1">'+esc(j)+'</b><button class="btn sm bad" data-act="jobdel" data-i="'+i+'">حذف</button></div>';}).join('')||'<div class="hint">لا توجد وظائف بعد</div>')+departmentSettings()+'</div><div class="card"><h2>المستخدمون والصلاحيات</h2><p class="sub">الدخول إلى البيانات محصور بالحسابات المسجلة (قواعد Firestore). صلاحيات الشاشات والإجراءات تُطبَّق في الواجهة. كلمة المرور حروف وأرقام (4 خانات على الأقل)، والأرقام العربية تتحول تلقائياً.</p><div class="fgrid"><input id="newuser" placeholder="اسم المستخدم: حروف أو أرقام"><input id="newpass" placeholder="كلمة المرور" type="password" autocomplete="new-password"></div><div style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0">'+PERMS.map(function(p){return '<label><input type="checkbox" value="'+p[0]+'" class="permcheck"> '+p[1]+'</label>';}).join('')+'</div><button class="btn pri" data-act="useradd">إضافة مستخدم</button>'+USERS.map(function(u,i){if(u.empId)return '';return '<div class="alert"><span style="flex:1">'+esc(u.username)+(u.admin?' · مدير':u.empId?' · بصمة موظف '+esc(u.empId):' · مستخدم')+'</span>'+(u.admin?'':(u.empId?'':'<button class="btn sm" data-act="useredit" data-i="'+i+'">تعديل الصلاحيات</button> ')+'<button class="btn sm bad" data-act="userdel" data-i="'+i+'">حذف</button>')+'</div>';}).join('')+'</div></div>'+geoCard()+empAccountsCard();}
 function geoCard(){var g=DB.settings.geo||{};
  return '<div class="card" style="margin-bottom:14px"><h2>البصمة الذاتية والنطاق الجغرافي</h2><p class="sub">يبصم الموظف من هاتفه داخل نطاق موقع العمل وفي وردية. الحضور المبكر يُثبَّت عند بداية الوردية بلا إضافي، والتأخر يُخصم، والانصراف بعد نهاية الوردية يُحتسب إضافياً. التحقق من الموقع يتم في متصفح الموظف وقد يمكن التحايل عليه ببرامج تزييف الموقع، لذلك راجع سجل الحضور دورياً.</p>'+
  '<label style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><input type="checkbox" id="g_on"'+(g.on?' checked':'')+'> تفعيل البصمة الذاتية</label>'+
@@ -59,7 +82,7 @@ function geoSave(){var err=$('#g_err'),lat=parseFloat(toEn(val('g_lat'))),lng=pa
  DB.settings.geo={on:on,lat:isFinite(lat)?lat:'',lng:isFinite(lng)?lng:'',radius:r,maxAcc:a};DB.settings.punchEarly=ea;DB.settings.punchLateOut=lo;save();toast('تم حفظ إعدادات البصمة الذاتية');}
 function geoHere(){toast('جارٍ تحديد موقعك…');getPos().then(function(p){$('#g_lat').value=p.lat.toFixed(6);$('#g_lng').value=p.lng.toFixed(6);toast('تم أخذ الموقع (دقة '+Math.round(p.acc)+' م). اضغط حفظ.');},function(e){toast(geoErrMsg(e));});}
 function addUser(){var u=normUser(val('newuser')),p=toEn(val('newpass')).trim(),perms=$$('.permcheck:checked').map(function(x){return x.value;});
- if(!validUser(u))return toast('اسم المستخدم حروف وأرقام فقط (يسمح بمسافة بين الكلمات)');if(!validPass(p))return toast('كلمة المرور أرقام فقط، من 4 إلى 20 رقماً');
+ if(!validUser(u))return toast('اسم المستخدم حروف وأرقام فقط (يسمح بمسافة بين الكلمات)');if(!validPass(p))return toast('كلمة المرور حروف وأرقام، 4 خانات على الأقل');
  if(USERS.some(function(x){return x.username.toLowerCase()===u.toLowerCase();}))return toast('اسم المستخدم موجود');
  if(!validPerms(perms))return toast('اختر شاشة واحدة على الأقل، والشاشة المرتبطة بكل صلاحية');
  HRStore.createUser(u,p,perms).then(function(){toast('تم إضافة المستخدم');},function(e){toast(errMsg(e));});}
