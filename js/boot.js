@@ -29,13 +29,13 @@ document.documentElement.dir='rtl';document.documentElement.lang='ar';
    if(p.role==='employee'){ // حساب موظف: شاشة البصمة فقط
     SP.profile={uid:p.uid,username:p.username,empId:p.empId};hideLoading();
     var r=await HRStore.startEmployee({onCfg:function(c){SP.cfg=c;drawSelfPunch();},onPunchList:function(l){SP.punches=l;drawSelfPunch();},onProfile:function(x){if(!x)onProfileChange(null);}});
-    SP.cfg=r.cfg;SP.punches=r.punches;drawSelfPunch();return;}
+    SP.cfg=r.cfg;SP.punches=r.punches;drawSelfPunch();setTimeout(offerBio,500);return;}
    currentUser={uid:p.uid,username:p.username,admin:!!p.admin,perms:p.perms||[]};
    var raw=await HRStore.start({onRemote:onRemoteData,onUsers:onUsers,onProfile:onProfileChange,onPunches:function(l){if(DB)processPunches(l);else pendingPunches=l;},onError:function(e){toast(errMsg(e));}});
    DB=buildDB(raw);idxCache=null;applyPrefs(p.prefs);publishCfg();if(pendingPunches){var pl=pendingPunches;pendingPunches=null;setTimeout(function(){processPunches(pl);},300);}
    hideLoading();drawShell();setNavMode('open');
    var h=location.hash.replace('#','');if(!h||!canRoute(h))location.hash=firstRoute();
-   route();
+   route();setTimeout(offerBio,700);
   }catch(e){started=false;pendingMsg=errMsg(e);try{await HRStore.logout();}catch(_){}}}
 
  window.hrAfterAuth=handle; // بعد إنشاء حساب المدير الأول

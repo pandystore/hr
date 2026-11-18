@@ -40,3 +40,15 @@ function bioModal(username){
     actions:on?[{label:'إلغاء التفعيل',cls:'bad',fn:function(){bioDisable().then(function(){closeModal();toast('تم إلغاء الدخول بالبصمة');});}},{label:'إغلاق',fn:closeModal}]
      :[{label:'تفعيل',cls:'pri',fn:function(){var p=toEn(val('bio_pass'));if(!validPass(p))return merr('أدخل كلمة المرور.');
       HRStore.verifyPassword(p).then(function(){return bioEnable(username,p);}).then(function(){closeModal();toast('تم تفعيل الدخول بالبصمة ✓');},function(e){merr(e&&e.code&&String(e.code).indexOf('auth/')===0?'كلمة المرور غير صحيحة.':bioErr(e));});}},{label:'إلغاء',fn:closeModal}]});});});}
+
+/* ---- عرض التفعيل التلقائي بعد أول دخول بكلمة المرور ---- */
+function bioFlagGet(){return bioIdb().then(function(d){return new Promise(function(res){var q=d.transaction(BIO_ST).objectStore(BIO_ST).get('declined');q.onsuccess=function(){res(!!q.result);};q.onerror=function(){res(false);};});}).catch(function(){return false;});}
+function bioFlagSet(v){return bioIdb().then(function(d){return new Promise(function(res){var t=d.transaction(BIO_ST,'readwrite');t.objectStore(BIO_ST)[v?'put':'delete'](true,'declined');t.oncomplete=res;t.onerror=res;});}).catch(function(){});}
+/* يُستدعى بعد نجاح الدخول بكلمة المرور (بيانات الدخول محفوظة في الذاكرة لحظياً فقط) */
+function offerBio(){
+ var c=window.__pendingCred;window.__pendingCred=null;if(!c)return;
+ bioSupported().then(function(ok){if(!ok)return;
+  Promise.all([bioEnabledFor(),bioFlagGet()]).then(function(r){var cur=r[0],declined=r[1];if(declined||(cur&&cur.username===c.u))return;
+   openModal({title:'الدخول بالبصمة أو الوجه',body:'<div style="text-align:center;padding:6px 0"><div style="font-size:48px;line-height:1">👆</div><p style="margin:10px 0 0;line-height:1.9">في المرة القادمة تدخل بلمسة بصمة أو بالوجه، دون كتابة كلمة المرور. يعمل على هذا الهاتف فقط.</p></div>',
+    actions:[{label:'تفعيل الآن',cls:'pri',fn:function(){bioEnable(c.u,c.p).then(function(){closeModal();toast('تم تفعيل الدخول بالبصمة ✓');},function(e){closeModal();toast(bioErr(e));});}},
+     {label:'لاحقاً',fn:closeModal},{label:'لا تسألني مرة أخرى',fn:function(){bioFlagSet(true).then(closeModal);}}]});});});}
