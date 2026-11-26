@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>نظام شؤون الموظفين</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#0f766e"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="icon" id="favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 x1=%270%27 y1=%270%27 x2=%271%27 y2=%271%27%3E%3Cstop offset=%270%27 stop-color=%27%232753E6%27/%3E%3Cstop offset=%271%27 stop-color=%27%234f2fc7%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27url(%23g)%27/%3E%3Cg fill=%27none%27 stroke=%27white%27 stroke-width=%273.6%27 stroke-linecap=%27round%27%3E%3Ccircle cx=%2724%27 cy=%2724%27 r=%279%27/%3E%3Cpath d=%27M8 50c0-9 7-15 16-15s16 6 16 15%27/%3E%3Ccircle cx=%2744%27 cy=%2727%27 r=%277%27/%3E%3Cpath d=%27M42 36c8 0 14 5 14 12%27/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head><body>
+<div id="app" dir="rtl" lang="ar">
+  <aside id="side"></aside>
+  <main>
+    <div class="top">
+      <h1 id="ttl"></h1>
+      <div class="monthnav" id="mnav"></div>
+      <button class="iconbtn" id="themebtn" data-act="theme" aria-label="تبديل الثيم"></button>
+    </div>
+    <div id="banner"></div>
+    <div id="view"></div>
+  </main>
+  <nav class="tab-bar" id="tabbar"></nav>
+</div>
+<div id="layer"></div>
+<div id="rcpt" dir="rtl"></div>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/punch.js"></script>
+<script src="js/selfpunch.js"></script>
+<script src="js/demo.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/ui-core.js"></script>
+<script src="js/data.js"></script>
+<script src="js/views-dashboard.js"></script>
+<script src="js/views-employees.js"></script>
+<script src="js/views-attendance.js"></script>
+<script src="js/views-money.js"></script>
+<script src="js/views-settings.js"></script>
+<script src="js/print.js"></script>
+<script src="js/biometric.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/events.js"></script>
+<script type="module" src="js/storage.js"></script>
+<script type="module" src="js/boot.js"></script>
+<script>
+/* شبكة أمان: لو لم تظهر أي شاشة خلال 8 ثوانٍ تُعرض أسباب محتملة بدل صفحة فارغة */
+(function(){var errs=[];window.addEventListener('error',function(e){errs.push(e.message||'script error');});window.addEventListener('unhandledrejection',function(e){errs.push(String(e.reason&&e.reason.message||e.reason));});
+ setTimeout(function(){if(document.querySelector('.login-screen')||document.querySelector('#selfpunch')||(document.querySelector('#side')&&document.querySelector('#side').children.length))return;
+  var d=document.createElement('div');d.dir='rtl';d.style.cssText='font:16px/1.9 Tahoma,sans-serif;max-width:560px;margin:40px auto;padding:20px;background:#fff;border:1px solid #ddd;border-radius:12px;color:#111';
+  d.innerHTML='<h2 style="margin-top:0">تعذر تشغيل النظام</h2><p>الأسباب المحتملة:</p><ul><li>فتح الملف مباشرة من الجهاز (file://). يجب فتحه من رابط https.</li><li>تعذر تحميل مكتبات Firebase (إنترنت أو حاجب إعلانات أو شبكة تحجب gstatic.com).</li><li>ملفات <b>js</b> أو <b>css</b> غير مرفوعة بجانب index.html.</li></ul>'+(errs.length?'<p dir="ltr" style="font-size:13px;color:#b00">'+errs.slice(0,3).join('<br>').replace(/</g,'&lt;')+'</p>':'');
+  document.body.appendChild(d);},8000);})();
+</script>
+<script>if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});</script>
+<script>(function(){var dp=null;addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;var b=document.createElement('button');b.textContent='تثبيت التطبيق';b.style.cssText='position:fixed;bottom:16px;left:16px;z-index:99;padding:10px 16px;border:0;border-radius:12px;background:#0f766e;color:#fff;font:inherit;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer';b.onclick=function(){dp.prompt();dp=null;b.remove();};document.body.appendChild(b);});})();</script>
+</body></html>
